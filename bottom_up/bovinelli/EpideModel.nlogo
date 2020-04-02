@@ -8,10 +8,9 @@ globals
   r0                    ;; The number of secondary infections that arise
                         ;; due to a single infected introduced in a wholly
                         ;; susceptible population
-  n_children
-  n_adults
-  n_oldies
-  chances
+  n_children            ;; number of children inside the population
+  n_adults              ;; number of adults inside the population
+  n_oldies              ;; number of elderly people inside the population
 ]
 
 turtles-own
@@ -25,11 +24,11 @@ turtles-own
   nb-infected         ;; Number of secondary infections caused by an
                       ;; infected person at the end of the tick
   nb-recovered        ;; Number of recovered people at the end of the tick
-  relative-recovery-chance
-  symptom-time
-  may-symptomatic?
-  showing-chance
-  quarantined?
+  relative-recovery-chance ;;chance of recovery (based on person age)
+  symptom-time ;;time for symptoms to show
+  may-symptomatic? ;;
+  showing-chance ;;chanche of showing symptoms
+  quarantined? ;;defines if a person has isolated itself
 ]
 
 
@@ -47,9 +46,9 @@ end
 to setup-numbers
   if (children% + adults%) > 100 [
     set children% 33
-    set adults% 34
+    set adults% 34 ;;arbitrary percentages to not break the code
   ]
-  set n_children initial-people * children% / 100
+  set n_children initial-people * children% / 100  ;;calculating the number of each type of person over the total population
   set n_adults initial-people * adults% / 100
   set n_oldies initial-people - n_children - n_adults
 end
@@ -65,10 +64,10 @@ to setup-people
     set quarantined? false
     set may-symptomatic? false
 
-    set recovery-time random-normal average-recovery-time average-recovery-time / 4
-    set symptom-time random-normal symptom-showing-time symptom-showing-time / 4
+    set recovery-time random-normal average-recovery-time average-recovery-time / 4  ;;default unmodified recovery time
+    set symptom-time random-normal symptom-showing-time symptom-showing-time / 4     ;;default unmodified symptom showing time
 
-    ;; set shape "airplane"
+    ;; the following blocks build people in base of their types, which only differs in different chances and timings, which I chose without consulting data
 
     ifelse n_children > 0 [
       set shape "bug"
@@ -93,12 +92,6 @@ to setup-people
     ]
 
     set color white
-
-
-
-    ;; Set the recovery time for each agent to fall on a
-    ;; normal distribution around average recovery time
-
 
     ;; make sure it lies between 0 and 2x average-recovery-time
     ;; if recovery-time > average-recovery-time * 2 [
@@ -167,16 +160,18 @@ to go
   tick
 end
 
+;; if enough time is passed for a person to show symptoms, there is a chanche that they will be uncovered
 to maybe-symptom
   if infection-length > symptom-time [
     set may-symptomatic? true
   ]
 end
 
+
+;; if the quarantine system is on and symptom is showing, people will isolate themselves
 to symptom
   if quarantine [
-    set chances random showing-chance
-    if chances = 0 [
+    if random showing-chance = 0 [
       set quarantined? true
     ]
   ]
@@ -198,7 +193,7 @@ end
 
 ;; Infection can occur to any susceptible person nearby
 to infect  ;; turtle procedure
-  if not quarantined? [
+  if not quarantined? [ ;; if person isn't isolated
    let nearby-uninfected (turtles-on neighbors)
      with [ not infected? and not cured? ]
 
@@ -350,7 +345,7 @@ initial-people
 initial-people
 50
 400
-400.0
+350.0
 5
 1
 NIL
@@ -403,7 +398,7 @@ infection-chance
 infection-chance
 10
 100
-60.0
+30.0
 5
 1
 NIL
@@ -539,7 +534,7 @@ symptom-showing-time
 symptom-showing-time
 0
 120
-50.0
+120.0
 10
 1
 NIL
