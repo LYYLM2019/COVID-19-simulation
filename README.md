@@ -1,4 +1,4 @@
-# 5Di-WorkGroup
+# COVID-19 simulation
 
 Nella cartella top_down vanno inseriti tutti i lavori di approccio analitico al problema.
 
